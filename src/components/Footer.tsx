@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, Mail } from "lucide-react";
+import { Mail } from "lucide-react";
 import { footerColumns, footerUtilityLinks, phoneNumbers, socialLinks } from "@/lib/navigation";
 import { FOCUS_RING, SR_NEW_WINDOW } from "@/lib/a11y";
 import { Logo } from "./Logo";
@@ -78,13 +78,7 @@ export function Footer() {
                     >
                       {item.label}
                       {item.external && (
-                        <>
-                          <ArrowUpRight
-                            className="h-3 w-3 shrink-0 mt-0.5 opacity-70"
-                            aria-hidden="true"
-                          />
-                          <span className="sr-only">{SR_NEW_WINDOW}</span>
-                        </>
+                        <span className="sr-only">{SR_NEW_WINDOW}</span>
                       )}
                     </Link>
                   </li>
