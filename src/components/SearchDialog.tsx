@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Loader2, Search, X } from "lucide-react";
+import { withBasePath } from "@/lib/base-path";
 import { searchPages, type SearchIndexEntry } from "@/lib/search";
 import { cn } from "@/lib/utils";
 
@@ -24,7 +25,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
     if (!open || index.length > 0) return;
 
     setLoading(true);
-    fetch("/search-index.json")
+    fetch(withBasePath("/search-index.json"))
       .then((res) => res.json())
       .then((data: SearchIndexEntry[]) => setIndex(data))
       .catch(() => setIndex([]))

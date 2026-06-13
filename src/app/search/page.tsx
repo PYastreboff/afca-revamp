@@ -4,6 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowRight, Search } from "lucide-react";
+import { withBasePath } from "@/lib/base-path";
 import { searchPages, type SearchIndexEntry } from "@/lib/search";
 
 function SearchResults() {
@@ -12,7 +13,7 @@ function SearchResults() {
   const [index, setIndex] = useState<SearchIndexEntry[]>([]);
 
   useEffect(() => {
-    fetch("/search-index.json")
+    fetch(withBasePath("/search-index.json"))
       .then((res) => res.json())
       .then((data: SearchIndexEntry[]) => setIndex(data))
       .catch(() => setIndex([]));
@@ -34,7 +35,7 @@ function SearchResults() {
         )}
       </div>
 
-      <form action="/search" method="get" className="mb-10">
+      <form action={withBasePath("/search")} method="get" className="mb-10">
         <label htmlFor="search-page-input" className="sr-only">
           Search
         </label>

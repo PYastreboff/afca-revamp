@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { withBasePath } from "@/lib/base-path";
 import { cn } from "@/lib/utils";
 
 type LogoProps = {
@@ -15,7 +16,7 @@ export function Logo({ className = "", variant = "default" }: LogoProps) {
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/logo-afca.svg"
+        src={withBasePath("/logo-afca.svg")}
         alt="Australian Financial Complaints Authority"
         width={210}
         height={92}
