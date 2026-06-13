@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Database, ExternalLink } from "lucide-react";
+import { ArrowRight, Database } from "lucide-react";
 import { Button } from "./Button";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { getParentCrumb, PageBackLink } from "./PageBackLink";
@@ -20,6 +20,12 @@ function DocumentLink({ label, href }: { label: string; href: string }) {
     "group inline-flex items-start gap-2 text-afca-navy hover:text-afca-blue font-medium transition-colors leading-relaxed rounded-sm",
     FOCUS_RING
   );
+  const icon = (
+    <ArrowRight
+      className="mt-1 h-3.5 w-3.5 shrink-0 opacity-70 transition-transform group-hover:translate-x-0.5"
+      aria-hidden="true"
+    />
+  );
 
   if (resolved.external) {
     return (
@@ -30,7 +36,7 @@ function DocumentLink({ label, href }: { label: string; href: string }) {
         rel="noopener noreferrer"
       >
         <span>{label}</span>
-        <ExternalLink className="mt-1 h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden="true" />
+        {icon}
         <span className="sr-only">{SR_NEW_WINDOW}</span>
       </a>
     );
@@ -39,7 +45,7 @@ function DocumentLink({ label, href }: { label: string; href: string }) {
   return (
     <Link href={resolved.href} className={className}>
       <span>{label}</span>
-      <ArrowRight className="mt-1 h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden="true" />
+      {icon}
     </Link>
   );
 }
