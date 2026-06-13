@@ -1,13 +1,108 @@
 "use client";
 
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useRef, useLayoutEffect } from "react";
 import Link from "next/link";
 import { Menu, X, ChevronDown, Phone, Search } from "lucide-react";
 import { Logo } from "./Logo";
 import { Button } from "./Button";
 import { SearchDialog, useSearchShortcut } from "./SearchDialog";
-import { mainNavigation, phoneNumbers, quickActions } from "@/lib/navigation";
+import { mainNavigation, phoneNumbers, quickActions, type NavItem } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
+
+const DROPDOWN_WIDTH = 352; // 22rem
+const VIEWPORT_PADDING = 16;
+
+function DesktopNavItem({
+  item,
+  isActive,
+  onActivate,
+  onDeactivate,
+}: {
+  item: NavItem;
+  isActive: boolean;
+  onActivate: () => void;
+  onDeactivate: () => void;
+}) {
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const [panelLeft, setPanelLeft] = useState(0);
+
+  useLayoutEffect(() => {
+    if (!isActive || !triggerRef.current || !panelRef.current) return;
+
+    const updatePosition = () => {
+      const trigger = triggerRef.current;
+      const panel = panelRef.current;
+      if (!trigger || !panel) return;
+
+      const rect = trigger.getBoundingClientRect();
+      const panelWidth = panel.offsetWidth || DROPDOWN_WIDTH;
+      let left = 0;
+
+      if (rect.left + panelWidth > window.innerWidth - VIEWPORT_PADDING) {
+        left = rect.width - panelWidth;
+      }
+
+      let leftEdge = rect.left + left;
+      if (leftEdge < VIEWPORT_PADDING) {
+        left += VIEWPORT_PADDING - leftEdge;
+      }
+
+      leftEdge = rect.left + left;
+      const rightEdge = leftEdge + panelWidth;
+      if (rightEdge > window.innerWidth - VIEWPORT_PADDING) {
+        left -= rightEdge - (window.innerWidth - VIEWPORT_PADDING);
+      }
+
+      setPanelLeft(left);
+    };
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    return () => window.removeEventListener("resize", updatePosition);
+  }, [isActive]);
+
+  return (
+    <div
+      ref={triggerRef}
+      className="relative"
+      onMouseEnter={onActivate}
+      onMouseLeave={onDeactivate}
+    >
+      <Link
+        href={item.href}
+        className={cn(
+          "flex items-center gap-1 px-3.5 py-2 text-sm font-semibold text-afca-navy rounded-xl transition-colors hover:bg-afca-cream hover:text-afca-blue",
+          isActive && "bg-afca-cream text-afca-blue"
+        )}
+      >
+        {item.label}
+        {item.children && <ChevronDown className="h-3.5 w-3.5 opacity-50" />}
+      </Link>
+
+      {item.children && isActive && (
+        <div
+          ref={panelRef}
+          className="absolute top-full z-50 pt-2 w-[22rem] max-w-[calc(100vw-2rem)]"
+          style={{ left: panelLeft }}
+        >
+          <div className="rounded-2xl border border-afca-navy/8 bg-white p-2 shadow-xl shadow-afca-navy/8 max-h-[min(70vh,28rem)] overflow-y-auto overscroll-contain">
+            {item.children.map((child) => (
+              <Link
+                key={child.href}
+                href={child.href}
+                className="block rounded-xl px-3.5 py-2.5 text-sm text-afca-gray hover:bg-afca-cream hover:text-afca-navy transition-colors"
+                {...(child.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+              >
+                {child.label}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -45,7 +140,7 @@ export function Header() {
   return (
     <header
       className={cn(
-        "sticky top-0 z-50 transition-all duration-300 relative",
+        "sticky top-0 z-50 transition-all duration-300 relative overflow-visible",
         scrolled
           ? "bg-white/90 backdrop-blur-lg shadow-sm shadow-afca-navy/5 border-b border-afca-navy/8"
           : "bg-white border-b border-transparent"
@@ -116,42 +211,15 @@ export function Header() {
           </button>
         </div>
 
-        <nav className="hidden lg:flex items-center gap-0.5" aria-label="Main navigation">
+        <nav className="hidden lg:flex items-center gap-0.5 overflow-visible" aria-label="Main navigation">
           {mainNavigation.map((item) => (
-            <div
+            <DesktopNavItem
               key={item.label}
-              className="relative"
-              onMouseEnter={() => setActiveMenu(item.label)}
-              onMouseLeave={() => setActiveMenu(null)}
-            >
-              <Link
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-1 px-3.5 py-2 text-sm font-semibold text-afca-navy rounded-xl transition-colors hover:bg-afca-cream hover:text-afca-blue",
-                  activeMenu === item.label && "bg-afca-cream text-afca-blue"
-                )}
-              >
-                {item.label}
-                {item.children && <ChevronDown className="h-3.5 w-3.5 opacity-50" />}
-              </Link>
-
-              {item.children && activeMenu === item.label && (
-                <div className="absolute left-0 top-full pt-2 w-[22rem]">
-                  <div className="rounded-2xl border border-afca-navy/8 bg-white p-2 shadow-xl shadow-afca-navy/8">
-                    {item.children.map((child) => (
-                      <Link
-                        key={child.href}
-                        href={child.href}
-                        className="block rounded-xl px-3.5 py-2.5 text-sm text-afca-gray hover:bg-afca-cream hover:text-afca-navy transition-colors"
-                        {...(child.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                      >
-                        {child.label}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+              item={item}
+              isActive={activeMenu === item.label}
+              onActivate={() => setActiveMenu(item.label)}
+              onDeactivate={() => setActiveMenu(null)}
+            />
           ))}
           <button
             type="button"

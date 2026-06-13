@@ -20,20 +20,26 @@ Open [http://localhost:3000](http://localhost:3000) to view the site.
 
 ## GitHub Pages
 
-This project is configured for static export and deploys automatically via GitHub Actions.
+This site is a static export deployed automatically on every push to `main`.
 
-1. Push the repo to GitHub
-2. In the repo go to **Settings → Pages**
-3. Under **Build and deployment**, set **Source** to **GitHub Actions**
-4. Push to `main` — the workflow builds and deploys the `out/` folder
+### One-time setup (required)
+
+1. Push this repo to GitHub
+2. Go to **Settings → Pages**
+3. Under **Build and deployment**, set **Source** to **Deploy from a branch**
+4. Set **Branch** to **`gh-pages`** and folder **`/ (root)`**, then Save
+
+The GitHub Action builds the site and pushes the `out/` folder to the `gh-pages` branch. If you see the README instead of the website, Pages is still serving the `main` branch — switch it to `gh-pages` as above.
 
 Your site will be live at:
 
-`https://<username>.github.io/<repo-name>/`
+**https://pyastreboff.github.io/afca-revamp/**
 
-For example, if the repo is `afca-revamp`:
+(Replace with your username/repo name if different.)
 
-`https://<username>.github.io/afca-revamp/`
+### Re-run deploy manually
+
+**Actions → Deploy to GitHub Pages → Run workflow**
 
 ### Local static preview (with GitHub Pages base path)
 
