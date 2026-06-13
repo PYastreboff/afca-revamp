@@ -5,8 +5,8 @@ import { FOCUS_RING } from "@/lib/a11y";
 import { formatLinkLabel } from "@/lib/format-link-label";
 import { resolveContentHref } from "@/lib/resolve-content-href";
 import { dedupeSectionLinks, cn } from "@/lib/utils";
-import { Button } from "./Button";
 import { Breadcrumbs } from "./Breadcrumbs";
+import { collectPageLinks, ContentSectionBody } from "./ContentSectionBody";
 import { ComplaintJourneyNav, ComplaintJourneySteps } from "./ComplaintJourneySteps";
 import { getParentCrumb, PageBackLink } from "./PageBackLink";
 import { getComplaintJourneyStep } from "@/lib/complaint-journey";
@@ -23,6 +23,7 @@ export function ContentPage({ content, breadcrumbs, path }: ContentPageProps) {
   const journeyStep = getComplaintJourneyStep(path);
   const heroTitle = getPageHeroTitle(content);
   const subtitle = getPageSubtitle(content);
+  const pageLinks = collectPageLinks(content.sections);
 
   return (
     <div>
@@ -54,42 +55,7 @@ export function ContentPage({ content, breadcrumbs, path }: ContentPageProps) {
                   {section.heading}
                 </h2>
               )}
-              {section.paragraphs?.map((p, j) => (
-                <p key={j} className="text-sm sm:text-base text-afca-gray leading-[1.7] mb-4 last:mb-0">
-                  {p}
-                </p>
-              ))}
-              {section.list && (
-                <ul className="space-y-2.5 text-sm sm:text-base text-afca-gray mb-4">
-                  {section.list.map((item, j) => (
-                    <li key={j} className="flex gap-3 leading-relaxed">
-                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-afca-sky" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              {section.links && (
-                <div className="flex flex-col sm:flex-row flex-wrap gap-2.5 mt-5">
-                  {dedupeSectionLinks(section.links).map((link, linkIndex) => {
-                    const resolved = resolveContentHref(link.href);
-                    const external = link.external ?? resolved.external;
-                    return (
-                      <Button
-                        key={`${linkIndex}-${link.href}`}
-                        href={resolved.href}
-                        variant="outline"
-                        size="sm"
-                        external={external}
-                        showExternalIcon={external}
-                        className="w-full sm:w-auto"
-                      >
-                        {formatLinkLabel(link.label, link.href)}
-                      </Button>
-                    );
-                  })}
-                </div>
-              )}
+              <ContentSectionBody section={section} pagePath={path} pageLinks={pageLinks} />
             </div>
           ))}
         </div>

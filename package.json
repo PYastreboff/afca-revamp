@@ -2,6 +2,7 @@
   "name": "afca-revamp",
   "version": "0.1.0",
   "private": true,
+  "description": "Unofficial test/demo redesign of the AFCA website. Not affiliated with AFCA.",
   "scripts": {
     "dev": "next dev",
     "build:urls": "node scripts/build-url-list.mjs",

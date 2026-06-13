@@ -22,13 +22,13 @@ function extractPageContent() {
   const title = document.querySelector("h1")?.innerText?.trim() || document.title;
   const desc = document.querySelector('meta[name="description"]')?.content || "";
   const sections = [];
-  let current = { paragraphs: [], list: [], links: [] };
+  let current = { paragraphs: [], list: [], links: [], embeds: [] };
 
   const push = () => {
-    if (current.heading || current.paragraphs.length || current.list.length) {
+    if (current.heading || current.paragraphs.length || current.list.length || current.embeds?.length) {
       sections.push({ ...current });
     }
-    current = { paragraphs: [], list: [], links: [] };
+    current = { paragraphs: [], list: [], links: [], embeds: [] };
   };
 
   const content = main.querySelector(".node__content, .field--name-body, article") || main;
@@ -61,6 +61,28 @@ function extractPageContent() {
           }
         }
         current.list.push(t);
+      });
+    } else if (tag === "IFRAME" || tag === "VIDEO") {
+      const src = el.getAttribute("src");
+      if (src) {
+        if (!current.embeds) current.embeds = [];
+        current.embeds.push({
+          src,
+          title: el.getAttribute("title") || el.getAttribute("aria-label") || "",
+        });
+      }
+    }
+  });
+
+  // Drupal oembed / media embed wrappers
+  content.querySelectorAll("iframe[src], .media-oembed-content iframe[src]").forEach((iframe) => {
+    const src = iframe.getAttribute("src");
+    if (!src) return;
+    if (!current.embeds) current.embeds = [];
+    if (!current.embeds.some((e) => e.src === src)) {
+      current.embeds.push({
+        src,
+        title: iframe.getAttribute("title") || "",
       });
     }
   });

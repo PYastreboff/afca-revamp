@@ -25,6 +25,7 @@ export function generateStaticParams() {
   return getAllPageSlugs()
     .filter((slug) => slug !== "news/latest-news")
     .filter((slug) => slug !== "news/statistics")
+    .filter((slug) => slug !== "members/apply-for-membership")
     .filter((slug) => slug !== "make-a-complaint/do-you-speak-another-language")
     .map((slug) => ({
       slug: slug.split("/"),

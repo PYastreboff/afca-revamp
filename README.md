@@ -1,4 +1,6 @@
-# AFCA Website Revamp
+# AFCA Website Revamp (Test Project)
+
+> **Disclaimer:** This is an **unofficial test/demo project**. It is not affiliated with, endorsed by, or operated by the Australian Financial Complaints Authority (AFCA). Content is sourced from publicly available AFCA materials for design and development practice only. For official information, visit [afca.org.au](https://www.afca.org.au/).
 
 A modern, clean redesign of the [Australian Financial Complaints Authority](https://www.afca.org.au/) website, preserving the original colour scheme, information architecture, and page structure.
 

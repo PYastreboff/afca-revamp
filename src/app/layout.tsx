@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { TestProjectBanner } from "@/components/TestProjectBanner";
 
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
@@ -18,11 +19,15 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "Australian Financial Complaints Authority (AFCA)",
-    template: "%s | AFCA",
+    default: "AFCA Website Revamp (Test Project)",
+    template: "%s | AFCA Revamp (Test)",
   },
   description:
-    "Independent, free and fair dispute resolution for financial complaints — helping consumers and small businesses across Australia.",
+    "Unofficial test/demo redesign of the AFCA website. Not affiliated with AFCA. For official information visit afca.org.au.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function RootLayout({
@@ -39,6 +44,7 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
+        <TestProjectBanner />
         <Header />
         <main id="main-content" className="flex-1">
           {children}

@@ -176,7 +176,6 @@ export function Hero() {
               size="lg"
               external
               showExternalIcon
-              hideExternalIconOnMobile
             >
               Track your complaint
             </Button>

@@ -90,7 +90,8 @@ function isEmptySection(section) {
   const hasParagraphs = section.paragraphs?.some((p) => p.trim());
   const hasList = section.list?.some((item) => item.trim());
   const hasLinks = section.links?.length;
-  return !hasHeading && !hasParagraphs && !hasList && !hasLinks;
+  const hasEmbeds = section.embeds?.length;
+  return !hasHeading && !hasParagraphs && !hasList && !hasLinks && !hasEmbeds;
 }
 
 function cleanParagraph(text) {
@@ -122,6 +123,15 @@ function transformPage(scraped) {
           (link) => link.label && link.href
         );
         if (links.length) result.links = links;
+      }
+      if (section.embeds?.length) {
+        const embeds = section.embeds
+          .filter((embed) => embed?.src)
+          .map((embed) => ({
+            src: embed.src,
+            ...(embed.title?.trim() ? { title: cleanParagraph(embed.title) } : {}),
+          }));
+        if (embeds.length) result.embeds = embeds;
       }
       return result;
     })
