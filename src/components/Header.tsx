@@ -6,6 +6,8 @@ import { Menu, X, ChevronDown, Phone, Search, ArrowUpRight, ArrowRight } from "l
 import { Logo } from "./Logo";
 import { SearchDialog, useSearchShortcut } from "./SearchDialog";
 import { mainNavigation, phoneNumbers, quickActions, type NavItem } from "@/lib/navigation";
+import { FOCUS_RING, SR_NEW_WINDOW } from "@/lib/a11y";
+import { useFocusTrap, useInertBackground } from "@/hooks/use-a11y";
 import { cn } from "@/lib/utils";
 
 const DROPDOWN_WIDTH = 352; // 22rem
@@ -19,8 +21,7 @@ const quickActionVariants = {
   sky: "bg-afca-sky text-afca-navy border-afca-sky/90 hover:brightness-[1.02] shadow-sm shadow-afca-sky/20",
 } as const;
 
-const quickActionFocus =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-afca-blue focus-visible:ring-offset-1";
+const quickActionFocus = FOCUS_RING;
 
 function QuickActionLink({
   action,
@@ -36,7 +37,7 @@ function QuickActionLink({
   const label = (
     <span className="inline-flex items-center gap-1">
       {action.label}
-      {action.external && (
+      {action.external && !mobile && (
         <ArrowUpRight className="h-3 w-3 shrink-0 opacity-60" aria-hidden />
       )}
     </span>
@@ -70,6 +71,7 @@ function QuickActionLink({
         onClick={onClick}
       >
         {content}
+        <span className="sr-only">{SR_NEW_WINDOW}</span>
       </a>
     );
   }
@@ -95,9 +97,11 @@ function DesktopNavItem({
   const triggerRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const [panelLeft, setPanelLeft] = useState(0);
+  const [focusOpen, setFocusOpen] = useState(false);
+  const showPanel = isActive || focusOpen;
 
   useLayoutEffect(() => {
-    if (!isActive || !triggerRef.current || !panelRef.current) return;
+    if (!showPanel || !triggerRef.current || !panelRef.current) return;
 
     const updatePosition = () => {
       const trigger = triggerRef.current;
@@ -129,7 +133,20 @@ function DesktopNavItem({
     updatePosition();
     window.addEventListener("resize", updatePosition);
     return () => window.removeEventListener("resize", updatePosition);
-  }, [isActive]);
+  }, [showPanel]);
+
+  const onTriggerKeyDown = (event: React.KeyboardEvent) => {
+    if (!item.children) return;
+
+    if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      setFocusOpen(true);
+      const firstLink = panelRef.current?.querySelector<HTMLElement>("a[href]");
+      firstLink?.focus();
+    } else if (event.key === "Escape") {
+      setFocusOpen(false);
+    }
+  };
 
   return (
     <div
@@ -137,36 +154,61 @@ function DesktopNavItem({
       className="relative"
       onMouseEnter={onActivate}
       onMouseLeave={onDeactivate}
+      onFocusCapture={() => item.children && setFocusOpen(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+          setFocusOpen(false);
+        }
+      }}
     >
       <Link
         href={item.href}
         className={cn(
           "flex items-center gap-1 px-3.5 py-2 text-sm font-semibold text-afca-navy rounded-xl transition-colors hover:bg-afca-cream hover:text-afca-blue",
-          isActive && "bg-afca-cream text-afca-blue"
+          FOCUS_RING,
+          showPanel && "bg-afca-cream text-afca-blue"
         )}
+        aria-haspopup={item.children ? "true" : undefined}
+        aria-expanded={item.children ? showPanel : undefined}
+        onKeyDown={onTriggerKeyDown}
       >
         {item.label}
-        {item.children && <ChevronDown className="h-3.5 w-3.5 opacity-50" />}
+        {item.children && (
+          <ChevronDown className="h-3.5 w-3.5 opacity-50" aria-hidden="true" />
+        )}
       </Link>
 
-      {item.children && isActive && (
+      {item.children && (
         <div
           ref={panelRef}
-          className="absolute top-full z-50 pt-2 w-[22rem] max-w-[calc(100vw-2rem)]"
+          className={cn(
+            "absolute top-full z-50 pt-2 w-[22rem] max-w-[calc(100vw-2rem)] transition-opacity",
+            showPanel ? "visible opacity-100" : "invisible opacity-0 pointer-events-none"
+          )}
           style={{ left: panelLeft }}
         >
-          <div className="rounded-2xl border border-afca-navy/8 bg-white p-2 shadow-xl shadow-afca-navy/8 max-h-[min(70vh,28rem)] overflow-y-auto overscroll-contain">
+          <ul
+            role="menu"
+            aria-label={`${item.label} submenu`}
+            className="rounded-2xl border border-afca-navy/8 bg-white p-2 shadow-xl shadow-afca-navy/8 max-h-[min(70vh,28rem)] overflow-y-auto overscroll-contain list-none m-0"
+          >
             {item.children.map((child) => (
-              <Link
-                key={child.href}
-                href={child.href}
-                className="block rounded-xl px-3.5 py-2.5 text-sm text-afca-gray hover:bg-afca-cream hover:text-afca-navy transition-colors"
-                {...(child.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-              >
-                {child.label}
-              </Link>
+              <li key={child.href} role="none">
+                <Link
+                  href={child.href}
+                  role="menuitem"
+                  className={cn(
+                    "block rounded-xl px-3.5 py-2.5 text-sm text-afca-gray hover:bg-afca-cream hover:text-afca-navy transition-colors",
+                    FOCUS_RING
+                  )}
+                  {...(child.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                >
+                  {child.label}
+                  {child.external && <span className="sr-only">{SR_NEW_WINDOW}</span>}
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       )}
     </div>
@@ -179,6 +221,8 @@ export function Header() {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   const openSearch = useCallback(() => {
     setMobileOpen(false);
@@ -186,6 +230,25 @@ export function Header() {
   }, []);
 
   useSearchShortcut(openSearch);
+  useFocusTrap(mobileOpen, mobileMenuRef, () => setMobileOpen(false));
+  useInertBackground(mobileOpen || searchOpen);
+
+  const wasMobileOpen = useRef(false);
+  useEffect(() => {
+    if (mobileOpen) {
+      wasMobileOpen.current = true;
+      const timer = window.setTimeout(() => {
+        const first = mobileMenuRef.current?.querySelector<HTMLElement>("a[href], button");
+        first?.focus();
+      }, 0);
+      return () => window.clearTimeout(timer);
+    }
+
+    if (wasMobileOpen.current) {
+      menuButtonRef.current?.focus();
+      wasMobileOpen.current = false;
+    }
+  }, [mobileOpen]);
 
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
@@ -214,6 +277,7 @@ export function Header() {
           ? "bg-white/90 backdrop-blur-lg shadow-sm shadow-afca-navy/5 border-b border-afca-navy/8"
           : "bg-white border-b border-transparent"
       )}
+      id="site-header"
     >
       {/* Desktop utility bar */}
       <div className="hidden md:block border-b border-afca-navy/6 bg-afca-surface/50">
@@ -221,9 +285,12 @@ export function Header() {
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 sm:gap-x-6">
             <a
               href={phoneNumbers.freeCall.href}
-              className="inline-flex items-center gap-2 whitespace-nowrap text-afca-gray hover:text-afca-blue transition-colors"
+              className={cn(
+                "inline-flex items-center gap-2 whitespace-nowrap text-afca-gray hover:text-afca-blue transition-colors rounded-sm",
+                FOCUS_RING
+              )}
             >
-              <Phone className="h-3.5 w-3.5 shrink-0 text-afca-blue" />
+              <Phone className="h-3.5 w-3.5 shrink-0 text-afca-blue" aria-hidden="true" />
               <span className="font-medium text-afca-navy">{phoneNumbers.freeCall.number}</span>
               <span className="hidden text-afca-muted xl:inline">free call</span>
             </a>
@@ -247,31 +314,47 @@ export function Header() {
 
       {/* Main header */}
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 lg:px-6 py-3 sm:py-3.5">
-        <Logo />
+        <Logo variant="compact" />
 
         <div className="flex items-center gap-2 lg:hidden">
           <button
             type="button"
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-afca-cream text-afca-navy hover:bg-afca-sky/15 transition-colors"
+            className={cn(
+              "flex h-10 w-10 items-center justify-center rounded-xl bg-afca-cream text-afca-navy hover:bg-afca-sky/15 transition-colors",
+              FOCUS_RING
+            )}
             onClick={openSearch}
             aria-label="Search"
           >
-            <Search className="h-4 w-4" />
+            <Search className="h-4 w-4" aria-hidden="true" />
           </button>
           <a
             href={phoneNumbers.freeCall.href}
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-afca-cream text-afca-blue hover:bg-afca-sky/15 transition-colors"
+            className={cn(
+              "flex h-10 w-10 items-center justify-center rounded-xl bg-afca-cream text-afca-blue hover:bg-afca-sky/15 transition-colors",
+              FOCUS_RING
+            )}
             aria-label={phoneNumbers.freeCall.label}
           >
-            <Phone className="h-4 w-4" />
+            <Phone className="h-4 w-4" aria-hidden="true" />
           </a>
           <button
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-afca-cream text-afca-navy hover:bg-afca-sky/15 transition-colors"
+            type="button"
+            ref={menuButtonRef}
+            className={cn(
+              "flex h-10 w-10 items-center justify-center rounded-xl bg-afca-cream text-afca-navy hover:bg-afca-sky/15 transition-colors",
+              FOCUS_RING
+            )}
             onClick={() => setMobileOpen(!mobileOpen)}
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
+            aria-controls="mobile-navigation"
           >
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            {mobileOpen ? (
+              <X className="h-5 w-5" aria-hidden="true" />
+            ) : (
+              <Menu className="h-5 w-5" aria-hidden="true" />
+            )}
           </button>
         </div>
 
@@ -287,11 +370,14 @@ export function Header() {
           ))}
           <button
             type="button"
-            className="ml-1 flex h-9 w-9 items-center justify-center rounded-xl text-afca-gray hover:bg-afca-cream hover:text-afca-navy transition-colors"
+            className={cn(
+              "ml-1 flex h-9 w-9 items-center justify-center rounded-xl text-afca-gray hover:bg-afca-cream hover:text-afca-navy transition-colors",
+              FOCUS_RING
+            )}
             aria-label="Search"
             onClick={openSearch}
           >
-            <Search className="h-4 w-4" />
+            <Search className="h-4 w-4" aria-hidden="true" />
           </button>
         </nav>
       </div>
@@ -299,7 +385,14 @@ export function Header() {
       <SearchDialog open={searchOpen} onClose={() => setSearchOpen(false)} />
 
       {mobileOpen && (
-        <div className="lg:hidden absolute left-0 right-0 top-full z-40 max-h-[calc(100dvh-3.5rem)] overflow-y-auto overscroll-contain bg-white border-t border-afca-navy/8 shadow-xl">
+        <div
+          ref={mobileMenuRef}
+          id="mobile-navigation"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mobile navigation"
+          className="lg:hidden absolute left-0 right-0 top-full z-40 max-h-[calc(100dvh-3.5rem)] overflow-y-auto overscroll-contain bg-white border-t border-afca-navy/8 shadow-xl"
+        >
           <div className="px-4 py-5">
             <nav className="flex flex-col gap-2 pb-5 mb-5 border-b border-afca-navy/8" aria-label="Quick links">
               {quickActions.map((action) => (
@@ -312,19 +405,26 @@ export function Header() {
               ))}
             </nav>
 
-            <div className="space-y-1 pb-5 mb-5 border-b border-afca-navy/8">
+            <nav aria-label="Contact" className="space-y-1 pb-5 mb-5 border-b border-afca-navy/8">
               <a
                 href={phoneNumbers.freeCall.href}
-                className="flex items-center gap-2.5 py-2.5 text-sm font-semibold text-afca-navy"
+                className={cn(
+                  "flex items-center gap-2.5 py-2.5 text-sm font-semibold text-afca-navy rounded-sm",
+                  FOCUS_RING
+                )}
               >
-                <Phone className="h-4 w-4 text-afca-blue shrink-0" />
+                <Phone className="h-4 w-4 text-afca-blue shrink-0" aria-hidden="true" />
                 {phoneNumbers.freeCall.label}
               </a>
-              <a href={phoneNumbers.members.href} className="block py-2 text-sm text-afca-muted pl-6">
+              <a
+                href={phoneNumbers.members.href}
+                className={cn("block py-2 text-sm text-afca-muted pl-6 rounded-sm", FOCUS_RING)}
+              >
                 {phoneNumbers.members.label}
               </a>
-            </div>
+            </nav>
 
+            <nav aria-label="Main navigation">
             {mainNavigation.map((item) => (
               <div key={item.label} className="border-b border-afca-navy/5 last:border-0">
                 <div className="flex items-center">
@@ -337,11 +437,16 @@ export function Header() {
                   </Link>
                   {item.children && (
                     <button
-                      className="flex h-11 w-11 items-center justify-center rounded-xl text-afca-gray hover:bg-afca-cream"
+                      type="button"
+                      className={cn(
+                        "flex h-11 w-11 items-center justify-center rounded-xl text-afca-gray hover:bg-afca-cream",
+                        FOCUS_RING
+                      )}
                       onClick={() =>
                         setExpandedSection(expandedSection === item.label ? null : item.label)
                       }
                       aria-expanded={expandedSection === item.label}
+                      aria-controls={`mobile-submenu-${item.label.replace(/\s+/g, "-").toLowerCase()}`}
                       aria-label={`${expandedSection === item.label ? "Collapse" : "Expand"} ${item.label} menu`}
                     >
                       <ChevronDown
@@ -349,12 +454,16 @@ export function Header() {
                           "h-4 w-4 transition-transform duration-200",
                           expandedSection === item.label && "rotate-180"
                         )}
+                        aria-hidden="true"
                       />
                     </button>
                   )}
                 </div>
                 {item.children && expandedSection === item.label && (
-                  <div className="pb-3 pl-1 space-y-0.5">
+                  <div
+                    id={`mobile-submenu-${item.label.replace(/\s+/g, "-").toLowerCase()}`}
+                    className="pb-3 pl-1 space-y-0.5"
+                  >
                     {item.children.map((child) => (
                       <Link
                         key={child.href}
@@ -370,6 +479,7 @@ export function Header() {
                 )}
               </div>
             ))}
+            </nav>
           </div>
         </div>
       )}

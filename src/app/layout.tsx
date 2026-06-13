@@ -35,7 +35,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col overflow-x-hidden bg-afca-surface">
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:rounded-xl focus:bg-afca-navy focus:px-4 focus:py-2 focus:text-white"
+          className="sr-only focus-visible:not-sr-only focus-visible:absolute focus-visible:top-4 focus-visible:left-4 focus-visible:z-[100] focus-visible:rounded-xl focus-visible:bg-afca-navy focus-visible:px-4 focus-visible:py-2 focus-visible:text-white focus-visible:ring-2 focus-visible:ring-afca-yellow focus-visible:ring-offset-2"
         >
           Skip to main content
         </a>

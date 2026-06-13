@@ -12,7 +12,9 @@
   --afca-cream: #f4f6f9;
   --afca-surface: #fafbfc;
   --afca-gray: #5a6474;
-  --afca-muted: #8b95a5;
+  --afca-muted: #6b7585;
+  --afca-on-navy-muted: #b8c5d6;
+  --afca-on-navy-subtle: #9aabbe;
   --background: #ffffff;
   --foreground: #002561;
   --radius: 1rem;
@@ -33,12 +35,40 @@
   --color-afca-surface: var(--afca-surface);
   --color-afca-gray: var(--afca-gray);
   --color-afca-muted: var(--afca-muted);
+  --color-afca-on-navy-muted: var(--afca-on-navy-muted);
+  --color-afca-on-navy-subtle: var(--afca-on-navy-subtle);
   --font-sans: var(--font-jakarta);
 }
 
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--afca-blue);
+  outline-offset: 2px;
 }
 
 body {

@@ -50,8 +50,17 @@ function extractPageContent() {
       });
     } else if (tag === "UL" || tag === "OL") {
       el.querySelectorAll(":scope > li").forEach((li) => {
+        const anchor = li.querySelector("a[href]");
         const t = li.innerText.trim();
-        if (t) current.list.push(t);
+        if (!t) return;
+        if (anchor) {
+          const href = anchor.getAttribute("href");
+          if (href && !href.startsWith("#")) {
+            current.links.push({ label: t, href });
+            return;
+          }
+        }
+        current.list.push(t);
       });
     }
   });

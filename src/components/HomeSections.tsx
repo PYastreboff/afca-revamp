@@ -176,11 +176,12 @@ export function Hero() {
               size="lg"
               external
               showExternalIcon
+              hideExternalIconOnMobile
             >
               Track your complaint
             </Button>
           </div>
-          <p className="mt-4 text-sm text-white/55">
+          <p className="mt-4 text-sm text-afca-on-navy-muted">
             Financial firm?{" "}
             <Link
               href="/members/apply-for-membership"
@@ -200,7 +201,7 @@ export function Hero() {
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-white leading-snug">{label}</p>
-                  <p className="mt-1 text-sm text-white/55 leading-relaxed">
+                  <p className="mt-1 text-sm text-afca-on-navy-muted leading-relaxed">
                     {trustDetails[label]}
                   </p>
                 </div>
@@ -224,7 +225,7 @@ export function Hero() {
                 </a>
               </div>
             </div>
-            <p className="text-sm text-white/55 sm:text-right sm:max-w-xs leading-relaxed">
+            <p className="text-sm text-afca-on-navy-muted sm:text-right sm:max-w-xs leading-relaxed">
               Free call for consumers and small businesses across Australia.
             </p>
           </div>
@@ -276,7 +277,7 @@ export function ComplaintCategories() {
         <div className="mt-10 sm:mt-12 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 rounded-2xl bg-afca-navy px-6 py-6 sm:px-8 sm:py-7 text-white">
           <div>
             <h3 className="text-lg font-bold">Not sure where to start?</h3>
-            <p className="mt-1 text-sm text-white/70 max-w-xl">
+            <p className="mt-1 text-sm text-afca-on-navy-muted max-w-xl">
               Answer a few quick questions and we&apos;ll point you to the right complaint path.
             </p>
           </div>
@@ -383,37 +384,43 @@ export function NewsSection() {
           </Button>
         </div>
 
-        <div className="grid gap-5 lg:grid-cols-12 lg:auto-rows-fr">
-          <article className="group relative flex flex-col overflow-hidden rounded-2xl bg-gradient-to-br from-afca-navy via-afca-navy to-afca-blue text-white lg:col-span-7 lg:row-span-3 p-7 sm:p-9 shadow-lg shadow-afca-navy/15 transition-all duration-300 hover:shadow-xl">
+        <div className="grid gap-5 lg:grid-cols-12 lg:items-start">
+          <article className="group relative flex flex-col overflow-hidden rounded-2xl bg-gradient-to-br from-afca-navy via-afca-navy to-afca-blue text-white lg:col-span-7 p-5 sm:p-6 shadow-lg shadow-afca-navy/15 transition-all duration-300 hover:shadow-xl">
             <div
               className="pointer-events-none absolute -bottom-12 -left-12 h-48 w-48 rounded-full bg-afca-yellow/10 blur-3xl"
-              aria-hidden
+              aria-hidden="true"
             />
-            <div className="relative flex items-center gap-3 mb-5">
-              <span className="rounded-md bg-white/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-afca-sky">
+            <div className="relative flex items-center gap-3 mb-3">
+              <span className="rounded-md bg-white/15 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-afca-teal">
                 {featuredArticle.tag}
               </span>
-              <time className="text-xs text-white/60">{featuredArticle.date}</time>
+              <time className="text-xs text-afca-on-navy-muted">{featuredArticle.date}</time>
             </div>
-            <h3 className="relative text-xl sm:text-2xl font-bold mb-4 leading-snug group-hover:text-afca-sky transition-colors">
-              <Link href={featuredArticle.href}>{featuredArticle.title}</Link>
+            <h3 className="relative text-lg sm:text-xl font-bold mb-2 leading-snug">
+              <Link
+                href={featuredArticle.href}
+                className="hover:text-afca-teal transition-colors rounded-sm after:absolute after:inset-0 after:rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-afca-yellow"
+              >
+                {featuredArticle.title}
+              </Link>
             </h3>
-            <p className="relative text-sm sm:text-base text-white/75 leading-relaxed flex-1 mb-6 line-clamp-4">
+            <p className="relative text-sm text-afca-on-navy-muted leading-relaxed mb-4 line-clamp-2">
               {featuredArticle.description}
             </p>
-            <Link
-              href={featuredArticle.href}
-              className="relative inline-flex items-center gap-1.5 text-sm font-semibold text-afca-yellow hover:text-afca-yellow-light transition-colors"
+            <span
+              className="relative inline-flex items-center gap-1.5 text-sm font-semibold text-afca-yellow pointer-events-none"
+              aria-hidden="true"
             >
               Read article
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-            </Link>
+              <ArrowRight className="h-4 w-4" />
+            </span>
           </article>
 
+          <div className="flex flex-col gap-5 lg:col-span-5">
           {otherArticles.map((article) => (
             <article
               key={article.href}
-              className="group surface-card rounded-2xl p-5 sm:p-6 flex flex-col transition-all duration-300 hover:-translate-y-0.5 lg:col-span-5"
+              className="group relative surface-card rounded-2xl p-5 sm:p-6 flex flex-col transition-all duration-300 hover:-translate-y-0.5"
             >
               <div className="flex items-center gap-3 mb-3">
                 <span className="rounded-md bg-afca-cream px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-afca-blue">
@@ -421,21 +428,27 @@ export function NewsSection() {
                 </span>
                 <time className="text-xs text-afca-muted">{article.date}</time>
               </div>
-              <h3 className="text-base font-bold text-afca-navy mb-2 group-hover:text-afca-blue transition-colors leading-snug line-clamp-2">
-                <Link href={article.href}>{article.title}</Link>
+              <h3 className="text-base font-bold text-afca-navy mb-2 leading-snug line-clamp-2">
+                <Link
+                  href={article.href}
+                  className="hover:text-afca-blue transition-colors rounded-sm after:absolute after:inset-0 after:rounded-2xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-afca-blue"
+                >
+                  {article.title}
+                </Link>
               </h3>
-              <p className="text-sm text-afca-gray leading-relaxed flex-1 mb-4 line-clamp-2">
+              <p className="text-sm text-afca-gray leading-relaxed mb-4 line-clamp-2">
                 {article.description}
               </p>
-              <Link
-                href={article.href}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-afca-blue hover:text-afca-navy transition-colors"
+              <span
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-afca-blue pointer-events-none"
+                aria-hidden="true"
               >
                 Read article
-                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-              </Link>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </span>
             </article>
           ))}
+          </div>
         </div>
       </div>
     </section>

@@ -1,11 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Loader2, Search, X } from "lucide-react";
 import { withBasePath } from "@/lib/base-path";
 import { searchPages, type SearchIndexEntry } from "@/lib/search";
+import { FOCUS_RING } from "@/lib/a11y";
+import { useFocusTrap, useRestoreFocus } from "@/hooks/use-a11y";
 import { cn } from "@/lib/utils";
 
 type SearchDialogProps = {
@@ -15,11 +17,17 @@ type SearchDialogProps = {
 
 export function SearchDialog({ open, onClose }: SearchDialogProps) {
   const router = useRouter();
+  const dialogRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const listboxId = useId();
+  const hintId = useId();
   const [query, setQuery] = useState("");
   const [index, setIndex] = useState<SearchIndexEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
+
+  useFocusTrap(open, dialogRef, onClose);
+  useRestoreFocus(open);
 
   useEffect(() => {
     if (!open || index.length > 0) return;
@@ -45,22 +53,11 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
 
   useEffect(() => {
     if (!open) return;
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        onClose();
-      }
-    };
-
-    document.addEventListener("keydown", onKeyDown);
     document.body.style.overflow = "hidden";
-
     return () => {
-      document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = "";
     };
-  }, [open, onClose]);
+  }, [open]);
 
   const results = useMemo(() => searchPages(query, index), [query, index]);
 
@@ -103,25 +100,37 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
 
   if (!open) return null;
 
+  const activeOptionId =
+    results.length > 0 ? `${listboxId}-option-${activeIndex}` : undefined;
+
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center p-4 sm:p-8">
-      <button
-        type="button"
+      <div
         className="absolute inset-0 bg-afca-navy/50 backdrop-blur-sm"
-        aria-label="Close search"
+        aria-hidden="true"
         onClick={onClose}
       />
 
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-label="Search AFCA"
+        aria-describedby={hintId}
         className="relative w-full max-w-2xl overflow-hidden rounded-2xl border border-afca-navy/10 bg-white shadow-2xl shadow-afca-navy/20"
       >
+        <p id={hintId} className="sr-only">
+          Search AFCA pages. Use arrow keys to move through results, Enter to open a result, and
+          Escape to close. Keyboard shortcut: Control+K or Command+K.
+        </p>
         <form onSubmit={onSubmit} className="flex items-center gap-3 border-b border-afca-navy/8 px-4 sm:px-5 py-4">
-          <Search className="h-5 w-5 shrink-0 text-afca-blue" />
+          <Search className="h-5 w-5 shrink-0 text-afca-blue" aria-hidden="true" />
+          <label htmlFor="search-dialog-input" className="sr-only">
+            Search AFCA
+          </label>
           <input
             ref={inputRef}
+            id="search-dialog-input"
             type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
@@ -130,31 +139,47 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
             className="min-w-0 flex-1 bg-transparent text-base text-afca-navy placeholder:text-afca-muted outline-none"
             autoComplete="off"
             spellCheck={false}
+            role="combobox"
+            aria-expanded={results.length > 0}
+            aria-controls={results.length > 0 ? listboxId : undefined}
+            aria-activedescendant={activeOptionId}
+            aria-autocomplete="list"
           />
           <button
             type="button"
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-xl text-afca-gray hover:bg-afca-cream hover:text-afca-navy transition-colors"
+            className={cn(
+              "flex h-9 w-9 items-center justify-center rounded-xl text-afca-gray hover:bg-afca-cream hover:text-afca-navy transition-colors",
+              FOCUS_RING
+            )}
             aria-label="Close search dialog"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4" aria-hidden="true" />
           </button>
         </form>
 
         <div className="max-h-[min(60vh,28rem)] overflow-y-auto">
           {loading && (
-            <div className="flex items-center justify-center gap-2 px-5 py-10 text-sm text-afca-muted">
-              <Loader2 className="h-4 w-4 animate-spin" />
+            <div
+              className="flex items-center justify-center gap-2 px-5 py-10 text-sm text-afca-muted"
+              role="status"
+              aria-live="polite"
+            >
+              <Loader2 className="h-4 w-4 motion-safe:animate-spin" aria-hidden="true" />
               Loading search index…
             </div>
           )}
 
           {!loading && query.trim() && results.length === 0 && (
-            <div className="px-5 py-10 text-center">
+            <div className="px-5 py-10 text-center" role="status">
               <p className="text-sm font-medium text-afca-navy">No results found</p>
               <p className="mt-1 text-sm text-afca-muted">
                 Try different keywords, or{" "}
-                <Link href="/search" onClick={onClose} className="text-afca-blue hover:underline">
+                <Link
+                  href="/search"
+                  onClick={onClose}
+                  className={cn("text-afca-blue hover:underline rounded-sm", FOCUS_RING)}
+                >
                   view all matches
                 </Link>
                 .
@@ -169,14 +194,18 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
           )}
 
           {!loading && results.length > 0 && (
-            <ul className="p-2">
+            <ul id={listboxId} role="listbox" aria-label="Search results" className="p-2 list-none m-0">
               {results.map((result, index) => (
-                <li key={result.href}>
+                <li key={result.href} role="presentation">
                   <button
                     type="button"
+                    id={`${listboxId}-option-${index}`}
+                    role="option"
+                    aria-selected={index === activeIndex}
                     onClick={() => goToResult(result.href)}
                     className={cn(
                       "flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left transition-colors",
+                      FOCUS_RING,
                       index === activeIndex ? "bg-afca-cream" : "hover:bg-afca-cream/70"
                     )}
                   >
@@ -186,7 +215,7 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
                         <p className="mt-1 text-sm text-afca-muted line-clamp-2">{result.excerpt}</p>
                       )}
                     </div>
-                    <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-afca-blue opacity-60" />
+                    <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-afca-blue opacity-60" aria-hidden="true" />
                   </button>
                 </li>
               ))}
@@ -194,9 +223,9 @@ export function SearchDialog({ open, onClose }: SearchDialogProps) {
           )}
         </div>
 
-        <div className="hidden sm:flex items-center justify-between gap-4 border-t border-afca-navy/8 px-5 py-3 text-xs text-afca-muted">
-          <span>Use ↑↓ to navigate, Enter to open, Esc to close</span>
-          <span>⌘K / Ctrl+K</span>
+        <div className="flex items-center justify-between gap-4 border-t border-afca-navy/8 px-5 py-3 text-xs text-afca-muted">
+          <span>↑↓ navigate · Enter open · Esc close</span>
+          <span className="hidden sm:inline">⌘K / Ctrl+K</span>
         </div>
       </div>
     </div>

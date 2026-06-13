@@ -23,13 +23,13 @@ export function ComplaintJourneySteps({ currentStep }: { currentStep: number }) 
                   isUpcoming && "bg-white/15 text-white/70 ring-1 ring-white/25"
                 )}
               >
-                {isComplete ? <Check className="h-4 w-4" strokeWidth={2.5} /> : item.step}
+                {isComplete ? <Check className="h-4 w-4" strokeWidth={2.5} aria-hidden="true" /> : item.step}
               </span>
               <span className="min-w-0 text-left">
                 <span
                   className={cn(
                     "block text-[11px] font-semibold uppercase tracking-[0.1em]",
-                    isCurrent ? "text-afca-sky" : "text-white/50"
+                    isCurrent ? "text-afca-teal" : "text-afca-on-navy-muted"
                   )}
                 >
                   Step {item.step}
@@ -37,7 +37,7 @@ export function ComplaintJourneySteps({ currentStep }: { currentStep: number }) 
                 <span
                   className={cn(
                     "block text-sm font-semibold leading-snug mt-0.5",
-                    isCurrent ? "text-white" : isComplete ? "text-white/90" : "text-white/65"
+                    isCurrent ? "text-white" : isComplete ? "text-white/95" : "text-afca-on-navy-muted"
                   )}
                 >
                   {item.title}

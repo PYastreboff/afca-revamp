@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ContentPage } from "@/components/ContentPage";
 import { getPageContent, getAllPageSlugs } from "@/lib/content";
+import { getPageMetaDescription } from "@/lib/page-subtitle";
 
 function buildBreadcrumbs(slug: string) {
   const parts = slug.split("/").filter(Boolean);
@@ -23,6 +24,7 @@ function buildBreadcrumbs(slug: string) {
 export function generateStaticParams() {
   return getAllPageSlugs()
     .filter((slug) => slug !== "news/latest-news")
+    .filter((slug) => slug !== "news/statistics")
     .filter((slug) => slug !== "make-a-complaint/do-you-speak-another-language")
     .map((slug) => ({
       slug: slug.split("/"),
@@ -42,7 +44,7 @@ export async function generateMetadata({
 
   return {
     title: content.title,
-    description: content.description,
+    description: getPageMetaDescription(content),
   };
 }
 

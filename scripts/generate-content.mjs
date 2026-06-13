@@ -97,6 +97,11 @@ function cleanParagraph(text) {
   return text.replace(/\s+/g, " ").trim();
 }
 
+function isSameHeading(a, b) {
+  if (!a || !b) return false;
+  return cleanParagraph(a).toLowerCase() === cleanParagraph(b).toLowerCase();
+}
+
 function transformPage(scraped) {
   const sections = (scraped.sections || [])
     .map((section) => {
@@ -126,7 +131,12 @@ function transformPage(scraped) {
     title: cleanParagraph(scraped.title || "Untitled"),
     sections,
   };
-  if (scraped.desc?.trim()) page.description = cleanParagraph(scraped.desc);
+
+  const description = scraped.desc?.trim() ? cleanParagraph(scraped.desc) : "";
+  if (description && !isSameHeading(description, page.title)) {
+    page.description = description;
+  }
+
   return page;
 }
 

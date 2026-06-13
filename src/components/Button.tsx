@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
+import { SR_NEW_WINDOW } from "@/lib/a11y";
 import { cn } from "@/lib/utils";
 
 type ButtonVariant = "yellow" | "orange" | "sky" | "navy" | "outline" | "ghost" | "hero-secondary";
@@ -29,6 +30,7 @@ type ButtonProps = {
   size?: "sm" | "md" | "lg";
   onClick?: () => void;
   showExternalIcon?: boolean;
+  hideExternalIconOnMobile?: boolean;
 };
 
 const sizes = {
@@ -46,6 +48,7 @@ export function Button({
   size = "md",
   onClick,
   showExternalIcon,
+  hideExternalIconOnMobile,
 }: ButtonProps) {
   const classes = cn(
     "inline-flex items-center justify-center rounded-xl font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-afca-sky focus-visible:ring-offset-2 text-center active:scale-[0.98]",
@@ -57,7 +60,14 @@ export function Button({
   const content = (
     <>
       {children}
-      {(external && showExternalIcon) && <ArrowUpRight className="h-4 w-4 opacity-70" />}
+      {(external && showExternalIcon) && (
+        <ArrowUpRight
+          className={cn(
+            "h-4 w-4 opacity-70",
+            hideExternalIconOnMobile && "max-sm:hidden"
+          )}
+        />
+      )}
     </>
   );
 
@@ -65,6 +75,7 @@ export function Button({
     return (
       <a href={href} className={classes} target="_blank" rel="noopener noreferrer" onClick={onClick}>
         {content}
+        <span className="sr-only">{SR_NEW_WINDOW}</span>
       </a>
     );
   }
