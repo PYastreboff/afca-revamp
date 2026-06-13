@@ -4,11 +4,18 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "build:urls": "node scripts/build-url-list.mjs",
+    "scrape": "node scripts/scrape-all.mjs",
+    "generate:content": "node scripts/generate-content.mjs",
+    "generate:search": "node scripts/generate-search-index.mjs",
+    "sync:content": "node scripts/build-url-list.mjs && node scripts/scrape-all.mjs && node scripts/generate-content.mjs && node scripts/generate-search-index.mjs",
+    "prebuild": "node scripts/generate-content.mjs && node scripts/generate-search-index.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
+    "lucide-react": "^1.18.0",
     "next": "16.2.9",
     "react": "19.2.4",
     "react-dom": "19.2.4"
@@ -20,6 +27,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
+    "puppeteer": "^25.1.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
