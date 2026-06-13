@@ -2,11 +2,11 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type ButtonVariant = "yellow" | "orange" | "sky" | "navy" | "outline" | "ghost";
+type ButtonVariant = "yellow" | "orange" | "sky" | "navy" | "outline" | "ghost" | "hero-secondary";
 
 const variants: Record<ButtonVariant, string> = {
   yellow:
-    "bg-afca-yellow text-afca-navy shadow-sm shadow-afca-yellow/25 hover:bg-afca-yellow-light hover:shadow-md hover:shadow-afca-yellow/30",
+    "bg-afca-yellow text-afca-navy shadow-sm shadow-black/10 hover:bg-afca-yellow-light",
   orange:
     "bg-afca-orange text-afca-navy shadow-sm shadow-afca-orange/20 hover:brightness-105 hover:shadow-md",
   sky:
@@ -15,8 +15,9 @@ const variants: Record<ButtonVariant, string> = {
     "bg-afca-navy text-white shadow-sm shadow-afca-navy/20 hover:bg-afca-blue hover:shadow-md",
   outline:
     "border border-afca-navy/20 bg-white text-afca-navy hover:border-afca-navy hover:bg-afca-navy hover:text-white",
-  ghost:
-    "text-afca-blue hover:bg-afca-cream hover:text-afca-navy",
+  ghost: "text-afca-blue hover:bg-afca-cream hover:text-afca-navy",
+  "hero-secondary":
+    "border border-white/50 bg-transparent text-white hover:bg-white/10 hover:border-white",
 };
 
 type ButtonProps = {

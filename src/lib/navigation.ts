@@ -10,10 +10,22 @@ export const phoneNumbers = {
   members: { number: "1300 56 55 62", label: "1300 56 55 62 (Members)", href: "tel:1300565562" },
 };
 
-export const quickActions = [
-  { label: "Lodge a complaint", href: "/make-a-complaint", variant: "yellow" as const },
-  { label: "Track your complaint", href: "https://my.afca.org.au/my-complaints", variant: "orange" as const, external: true },
-  { label: "For member firms", href: "/members", variant: "sky" as const },
+export type QuickActionVariant = "yellow" | "orange" | "sky";
+
+export const quickActions: {
+  label: string;
+  href: string;
+  variant: QuickActionVariant;
+  external?: boolean;
+}[] = [
+  { label: "Lodge a complaint", href: "/make-a-complaint", variant: "yellow" },
+  {
+    label: "Track your complaint",
+    href: "https://my.afca.org.au/my-complaints",
+    variant: "orange",
+    external: true,
+  },
+  { label: "For member firms", href: "/members", variant: "sky" },
 ];
 
 export const mainNavigation: NavItem[] = [
@@ -152,9 +164,83 @@ export const complaintCategories = [
   { label: "Superannuation", href: "/make-a-complaint/superannuation", icon: "superannuation" },
 ];
 
-export const socialLinks = [
-  { label: "Facebook", href: "https://www.facebook.com/AFCA.org.au" },
-  { label: "Twitter", href: "https://twitter.com/afca_org_au" },
-  { label: "YouTube", href: "https://www.youtube.com/user/AFCAorgau" },
-  { label: "LinkedIn", href: "https://www.linkedin.com/company/australian-financial-complaints-authority" },
+export type SocialNetwork = "facebook" | "x" | "linkedin" | "youtube";
+
+export const socialLinks: { label: string; href: string; network: SocialNetwork }[] = [
+  {
+    label: "Facebook",
+    href: "https://www.facebook.com/AustralianFinancialComplaintsAuthority/",
+    network: "facebook",
+  },
+  {
+    label: "X",
+    href: "https://x.com/afca_org_au",
+    network: "x",
+  },
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/company/australian-financial-complaints-authority/",
+    network: "linkedin",
+  },
+  {
+    label: "YouTube",
+    href: "https://www.youtube.com/channel/UCe5liv0ZvcelpvuVQa6YALw",
+    network: "youtube",
+  },
+];
+
+export const footerUtilityLinks: NavItem[] = [
+  { label: "Privacy", href: "/about-afca/policies/privacy-policy" },
+  { label: "Accessibility", href: "/about-afca/accessibility" },
+  { label: "Website information", href: "/about-afca/website-information" },
+  { label: "Contact us", href: "/about-afca/contact-us" },
+  { label: "Social media", href: "/news/social-media" },
+  { label: "Feedback", href: "/about-afca/feedback-and-complaints-about-our-service" },
+];
+
+export const footerColumns: NavItem[] = [
+  {
+    label: "Lodging a complaint",
+    href: "/make-a-complaint",
+    children: [
+      { label: "Before you complain to us", href: "/make-a-complaint/complain" },
+      { label: "Languages", href: "/make-a-complaint/do-you-speak-another-language" },
+      { label: "Accessibility and support", href: "/make-a-complaint/accessibility-and-support" },
+      { label: "Find a financial firm", href: "https://my.afca.org.au/ff-search/", external: true },
+      { label: "Financial hardship complaints", href: "/make-a-complaint/financial-hardship-complaints" },
+    ],
+  },
+  {
+    label: "Your complaint journey",
+    href: "/what-to-expect",
+    children: [
+      { label: "Complaints we consider", href: "/what-to-expect/complaints-we-consider" },
+      { label: "The process we follow", href: "/what-to-expect/the-process-we-follow" },
+      { label: "How we make decisions", href: "/what-to-expect/how-we-make-decisions" },
+      { label: "Outcomes AFCA provides", href: "/what-to-expect/outcomes-afca-provides" },
+      { label: "Other places to get help", href: "/what-to-expect/other-places-to-get-help" },
+    ],
+  },
+  {
+    label: "News & outreach",
+    href: "/news",
+    children: [
+      { label: "Latest news", href: "/news/latest-news" },
+      { label: "Current matters", href: "/news/current-matters" },
+      { label: "Media centre", href: "/news/media-centre" },
+      { label: "Consultation", href: "/news/consultation" },
+      { label: "Statistics", href: "/news/statistics" },
+    ],
+  },
+  {
+    label: "About AFCA",
+    href: "/about-afca",
+    children: [
+      { label: "Contact us", href: "/about-afca/contact-us" },
+      { label: "Rules and guidelines", href: "/about-afca/rules-and-guidelines" },
+      { label: "Annual Review", href: "/about-afca/annual-review" },
+      { label: "Careers", href: "/careers" },
+      { label: "For member firms", href: "/members" },
+    ],
+  },
 ];

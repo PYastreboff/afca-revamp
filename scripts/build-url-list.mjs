@@ -61,7 +61,6 @@ function shouldInclude(pathname) {
   if (pathname.includes("/node/")) return false;
   if (pathname.includes("/taxonomy/")) return false;
   if (pathname.startsWith("/news/media-releases/")) return false;
-  if (pathname.startsWith("/news/latest-news/")) return false;
   if (pathname === "/page-not-found") return false;
   if (pathname === "/quiz") return false;
   return true;

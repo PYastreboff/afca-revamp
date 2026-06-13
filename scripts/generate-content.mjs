@@ -50,13 +50,31 @@ function isExternal(href) {
 }
 
 function dedupeLinks(links) {
-  const seen = new Set();
-  return links.filter((link) => {
-    const key = `${link.label}::${link.href}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+  const generic = /^(find out more|learn more|read more|here|click here)$/i;
+  const byHref = new Map();
+
+  for (const link of links) {
+    const existing = byHref.get(link.href);
+    if (!existing) {
+      byHref.set(link.href, link);
+      continue;
+    }
+
+    const existingGeneric = generic.test(existing.label.trim());
+    const linkGeneric = generic.test(link.label.trim());
+
+    if (existingGeneric && !linkGeneric) {
+      byHref.set(link.href, link);
+    } else if (
+      !existingGeneric &&
+      !linkGeneric &&
+      link.label.trim().length > existing.label.trim().length
+    ) {
+      byHref.set(link.href, link);
+    }
+  }
+
+  return [...byHref.values()];
 }
 
 function transformLink(link) {
@@ -127,6 +145,27 @@ function main() {
       page.sections = [{ paragraphs: [page.title] }];
     }
     pages[slug] = page;
+  }
+
+  const latestNewsPath = path.join(__dirname, "..", "src", "lib", "latest-news-articles.json");
+  if (fs.existsSync(latestNewsPath)) {
+    const articles = JSON.parse(fs.readFileSync(latestNewsPath, "utf8"));
+    for (const article of articles) {
+      const slug = article.href.replace(/^\/+|\/+$/g, "");
+      if (pages[slug]) continue;
+      pages[slug] = {
+        title: article.title,
+        ...(article.excerpt ? { description: article.excerpt } : {}),
+        sections: [
+          {
+            paragraphs: [
+              article.excerpt ||
+                `${article.title}. Visit the AFCA website for the full article.`,
+            ],
+          },
+        ],
+      };
+    }
   }
 
   fs.writeFileSync(outPath, JSON.stringify(pages, null, 0));

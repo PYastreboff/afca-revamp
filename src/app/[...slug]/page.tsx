@@ -21,9 +21,12 @@ function buildBreadcrumbs(slug: string) {
 }
 
 export function generateStaticParams() {
-  return getAllPageSlugs().map((slug) => ({
-    slug: slug.split("/"),
-  }));
+  return getAllPageSlugs()
+    .filter((slug) => slug !== "news/latest-news")
+    .filter((slug) => slug !== "make-a-complaint/do-you-speak-another-language")
+    .map((slug) => ({
+      slug: slug.split("/"),
+    }));
 }
 
 export async function generateMetadata({
@@ -54,5 +57,5 @@ export default async function Page({
 
   if (!content) notFound();
 
-  return <ContentPage content={content} breadcrumbs={buildBreadcrumbs(path)} />;
+  return <ContentPage content={content} breadcrumbs={buildBreadcrumbs(path)} path={path} />;
 }

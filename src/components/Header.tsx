@@ -2,15 +2,84 @@
 
 import { useCallback, useState, useEffect, useRef, useLayoutEffect } from "react";
 import Link from "next/link";
-import { Menu, X, ChevronDown, Phone, Search } from "lucide-react";
+import { Menu, X, ChevronDown, Phone, Search, ArrowUpRight, ArrowRight } from "lucide-react";
 import { Logo } from "./Logo";
-import { Button } from "./Button";
 import { SearchDialog, useSearchShortcut } from "./SearchDialog";
 import { mainNavigation, phoneNumbers, quickActions, type NavItem } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
 const DROPDOWN_WIDTH = 352; // 22rem
 const VIEWPORT_PADDING = 16;
+
+const quickActionVariants = {
+  yellow:
+    "bg-afca-yellow text-afca-navy border-afca-yellow/90 hover:bg-afca-yellow-light shadow-sm shadow-black/5",
+  orange:
+    "bg-afca-orange text-afca-navy border-afca-orange/90 hover:brightness-[1.02] shadow-sm shadow-afca-orange/15",
+  sky: "bg-afca-sky text-afca-navy border-afca-sky/90 hover:brightness-[1.02] shadow-sm shadow-afca-sky/20",
+} as const;
+
+const quickActionFocus =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-afca-blue focus-visible:ring-offset-1";
+
+function QuickActionLink({
+  action,
+  onClick,
+  mobile,
+}: {
+  action: (typeof quickActions)[number];
+  onClick?: () => void;
+  mobile?: boolean;
+}) {
+  const colorClass = quickActionVariants[action.variant];
+
+  const label = (
+    <span className="inline-flex items-center gap-1">
+      {action.label}
+      {action.external && (
+        <ArrowUpRight className="h-3 w-3 shrink-0 opacity-60" aria-hidden />
+      )}
+    </span>
+  );
+
+  const classes = cn(
+    "inline-flex items-center justify-center border font-semibold transition-all duration-200",
+    quickActionFocus,
+    colorClass,
+    mobile
+      ? "w-full rounded-xl px-4 py-3 text-sm justify-between"
+      : "shrink-0 whitespace-nowrap rounded-md px-3.5 py-1.5 text-xs"
+  );
+
+  const content = mobile ? (
+    <>
+      {label}
+      <ArrowRight className="h-4 w-4 shrink-0 opacity-50" aria-hidden />
+    </>
+  ) : (
+    label
+  );
+
+  if (action.external) {
+    return (
+      <a
+        href={action.href}
+        className={classes}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={onClick}
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <Link href={action.href} className={classes} onClick={onClick}>
+      {content}
+    </Link>
+  );
+}
 
 function DesktopNavItem({
   item,
@@ -148,36 +217,31 @@ export function Header() {
     >
       {/* Desktop utility bar */}
       <div className="hidden md:block border-b border-afca-navy/6 bg-afca-surface/50">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 lg:px-6 py-2 text-sm">
-          <div className="flex items-center gap-6">
+        <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 py-2 text-sm lg:flex-row lg:items-center lg:justify-between lg:gap-4 lg:px-6">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 sm:gap-x-6">
             <a
               href={phoneNumbers.freeCall.href}
-              className="flex items-center gap-2 text-afca-gray hover:text-afca-blue transition-colors"
+              className="inline-flex items-center gap-2 whitespace-nowrap text-afca-gray hover:text-afca-blue transition-colors"
             >
-              <Phone className="h-3.5 w-3.5 text-afca-blue" />
+              <Phone className="h-3.5 w-3.5 shrink-0 text-afca-blue" />
               <span className="font-medium text-afca-navy">{phoneNumbers.freeCall.number}</span>
-              <span className="text-afca-muted">free call</span>
+              <span className="hidden text-afca-muted xl:inline">free call</span>
             </a>
             <a
               href={phoneNumbers.members.href}
-              className="text-afca-muted hover:text-afca-blue transition-colors"
+              className="hidden whitespace-nowrap text-afca-muted hover:text-afca-blue transition-colors lg:inline"
             >
               Members: {phoneNumbers.members.number}
             </a>
           </div>
-          <div className="flex items-center gap-2">
+          <nav
+            className="flex w-full flex-wrap items-center gap-2 border-t border-afca-navy/6 pt-2 lg:w-auto lg:border-0 lg:pt-0 lg:justify-end"
+            aria-label="Quick links"
+          >
             {quickActions.map((action) => (
-              <Button
-                key={action.label}
-                href={action.href}
-                variant={action.variant}
-                external={action.external}
-                size="sm"
-              >
-                {action.label}
-              </Button>
+              <QuickActionLink key={action.label} action={action} />
             ))}
-          </div>
+          </nav>
         </div>
       </div>
 
@@ -237,21 +301,16 @@ export function Header() {
       {mobileOpen && (
         <div className="lg:hidden absolute left-0 right-0 top-full z-40 max-h-[calc(100dvh-3.5rem)] overflow-y-auto overscroll-contain bg-white border-t border-afca-navy/8 shadow-xl">
           <div className="px-4 py-5">
-            <div className="flex flex-col gap-2.5 pb-5 mb-5 border-b border-afca-navy/8">
+            <nav className="flex flex-col gap-2 pb-5 mb-5 border-b border-afca-navy/8" aria-label="Quick links">
               {quickActions.map((action) => (
-                <Button
+                <QuickActionLink
                   key={action.label}
-                  href={action.href}
-                  variant={action.variant}
-                  external={action.external}
-                  size="md"
-                  className="w-full"
+                  action={action}
                   onClick={closeMobile}
-                >
-                  {action.label}
-                </Button>
+                  mobile
+                />
               ))}
-            </div>
+            </nav>
 
             <div className="space-y-1 pb-5 mb-5 border-b border-afca-navy/8">
               <a

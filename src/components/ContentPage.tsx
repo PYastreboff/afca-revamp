@@ -1,20 +1,30 @@
 import Link from "next/link";
 import { ChevronRight, ArrowRight } from "lucide-react";
 import type { PageContent } from "@/lib/types";
+import { formatLinkLabel } from "@/lib/format-link-label";
+import { dedupeSectionLinks } from "@/lib/utils";
 import { Button } from "./Button";
+import { ComplaintJourneyNav, ComplaintJourneySteps } from "./ComplaintJourneySteps";
+import { getParentCrumb, PageBackLink } from "./PageBackLink";
+import { getComplaintJourneyStep } from "@/lib/complaint-journey";
 
 type ContentPageProps = {
   content: PageContent;
   breadcrumbs: { label: string; href: string }[];
+  path: string;
 };
 
-export function ContentPage({ content, breadcrumbs }: ContentPageProps) {
+export function ContentPage({ content, breadcrumbs, path }: ContentPageProps) {
+  const parent = getParentCrumb(breadcrumbs);
+  const journeyStep = getComplaintJourneyStep(path);
+
   return (
     <div>
       <section className="relative overflow-hidden bg-afca-navy text-white">
         <div className="absolute inset-0 hero-mesh opacity-30 pointer-events-none" />
         <div className="absolute inset-0 bg-gradient-to-br from-afca-navy via-afca-navy to-afca-blue/80" />
         <div className="relative mx-auto max-w-4xl px-4 sm:px-6 pt-8 pb-10 sm:pt-10 sm:pb-14 md:pt-12 md:pb-16">
+          {parent && <PageBackLink href={parent.href} label={parent.label} />}
           <nav aria-label="Breadcrumb" className="mb-5 sm:mb-6">
             <ol className="flex flex-wrap items-center gap-x-1 gap-y-1 text-xs sm:text-sm text-white/50">
               {breadcrumbs.map((crumb, i) => (
@@ -31,6 +41,7 @@ export function ContentPage({ content, breadcrumbs }: ContentPageProps) {
               ))}
             </ol>
           </nav>
+          {journeyStep && <ComplaintJourneySteps currentStep={journeyStep} />}
           <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[2.75rem] font-bold tracking-tight text-balance leading-tight">
             {content.hero ?? content.title}
           </h1>
@@ -71,16 +82,17 @@ export function ContentPage({ content, breadcrumbs }: ContentPageProps) {
               )}
               {section.links && (
                 <div className="flex flex-col sm:flex-row flex-wrap gap-2.5 mt-5">
-                  {section.links.map((link) => (
+                  {dedupeSectionLinks(section.links).map((link, linkIndex) => (
                     <Button
-                      key={link.href}
+                      key={`${linkIndex}-${link.href}`}
                       href={link.href}
                       variant="outline"
                       size="sm"
                       external={link.external}
+                      showExternalIcon={link.external}
                       className="w-full sm:w-auto"
                     >
-                      {link.label}
+                      {formatLinkLabel(link.label, link.href)}
                     </Button>
                   ))}
                 </div>
@@ -89,19 +101,21 @@ export function ContentPage({ content, breadcrumbs }: ContentPageProps) {
           ))}
         </div>
 
+        {journeyStep && <ComplaintJourneyNav currentStep={journeyStep} />}
+
         {content.relatedLinks && content.relatedLinks.length > 0 && (
           <aside className="mt-12 sm:mt-16 surface-card rounded-2xl p-6 sm:p-8">
             <h2 className="text-sm font-bold uppercase tracking-widest text-afca-blue mb-5">
               Related topics
             </h2>
             <ul className="space-y-3">
-              {content.relatedLinks.map((link) => (
-                <li key={link.href}>
+              {dedupeSectionLinks(content.relatedLinks).map((link, linkIndex) => (
+                <li key={`${linkIndex}-${link.href}`}>
                   <Link
                     href={link.href}
                     className="group inline-flex items-center gap-2 text-afca-navy hover:text-afca-blue font-medium transition-colors"
                   >
-                    {link.label}
+                    {formatLinkLabel(link.label, link.href)}
                     <ArrowRight className="h-4 w-4 opacity-40 transition-transform group-hover:translate-x-0.5 group-hover:opacity-100" />
                   </Link>
                 </li>
