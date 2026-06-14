@@ -1,0 +1,6 @@
+1:"$Sreact.fragment"
+2:I[20120,["/afca-revamp/_next/static/chunks/1g_dd1mbkbvtu.js","/afca-revamp/_next/static/chunks/14mrh2-p_w84d.js","/afca-revamp/_next/static/chunks/3z7v_8u_r4off.js"],"LatestNewsPage"]
+3:I[97367,["/afca-revamp/_next/static/chunks/1g_dd1mbkbvtu.js","/afca-revamp/_next/static/chunks/14mrh2-p_w84d.js"],"OutletBoundary"]
+4:"$Sreact.suspense"
+0:{"rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/afca-revamp/_next/static/chunks/3z7v_8u_r4off.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"hF-f4dxe9KKe7zXdds3Jz"}
+5:null
