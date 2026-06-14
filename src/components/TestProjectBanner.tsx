@@ -10,7 +10,7 @@ export function TestProjectBanner() {
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 py-2 text-center text-xs sm:text-sm text-afca-on-navy-muted leading-relaxed">
         <strong className="font-semibold text-white">Test project.</strong> This is an unofficial
-        demo redesign and is not affiliated with AFCA yet. Official site:{" "}
+        demo redesign and is not affiliated with AFCA. Official site:{" "}
         <a
           href="https://www.afca.org.au/"
           className={cn(
